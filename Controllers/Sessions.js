@@ -731,7 +731,7 @@ exports.getNotDoneSessions = async (req, res) => {
 exports.getNotDoneSessionsFromUser = async (req, res) => {
   try {
     const sessions = await Sessions.customQuery(
-      "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0) AND serverName = ?",
+      "SELECT * FROM sessions WHERE (isDone = 0 OR (isPaid = 0 AND isDebt = 0)) AND serverName = ?",
       [req.user.name]
     );
     const clients = await Clients.customQuery("SELECT * FROM clients", []);
