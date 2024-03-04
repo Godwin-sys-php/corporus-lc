@@ -840,7 +840,7 @@ exports.generateVoucherForDrinks = async (req, res) => {
                 console.log(err);
               } else {
                 Sessions.customQuery("INSERT INTO vouchers SET ?", {
-                  voucherUrl: `http://147.182.240.60/Vouchers/${nameOfFile}`,
+                  voucherUrl: `http://143.198.59.223/Vouchers/${nameOfFile}`,
                   serverName: req._session.serverName,
                   clientName: req._session.clientName,
                   timestamp: now.unix(),
@@ -854,7 +854,7 @@ exports.generateVoucherForDrinks = async (req, res) => {
                         req.app
                           .get("socketService")
                           .broadcastEmiter(
-                            `http://147.182.240.60/Vouchers/${nameOfFile}`,
+                            `http://143.198.59.223/Vouchers/${nameOfFile}`,
                             "print-session"
                           );
                         res.status(200).json({ success: true });
@@ -933,7 +933,7 @@ exports.generateVoucherForFoods = async (req, res) => {
                 console.log(err);
               } else {
                 Sessions.customQuery("INSERT INTO vouchers SET ?", {
-                  voucherUrl: `http://147.182.240.60/Vouchers/${nameOfFile}`,
+                  voucherUrl: `http://143.198.59.223/Vouchers/${nameOfFile}`,
                   serverName: req._session.serverName,
                   clientName: req._session.clientName,
                   timestamp: now.unix(),
@@ -947,7 +947,7 @@ exports.generateVoucherForFoods = async (req, res) => {
                         req.app
                           .get("socketService")
                           .broadcastEmiter(
-                            `http://147.182.240.60/Vouchers/${nameOfFile}`,
+                            `http://143.198.59.223/Vouchers/${nameOfFile}`,
                             "print-session"
                           );
                         res.status(200).json({ success: true });
