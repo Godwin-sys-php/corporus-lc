@@ -6,6 +6,7 @@ require("dotenv").config();
 
 exports.login = async (req, res) => {
   try {
+    console.log("mobigo");
     const user = await Users.find({ username: req.body.username });
     if (user.length === 0) {
       return res
