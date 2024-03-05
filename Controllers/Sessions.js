@@ -783,6 +783,26 @@ exports.getOneSession = async (req, res) => {
   }
 };
 
+exports.getReportOfADay = async (req, res) => {
+  try {
+    const begin = Number(req.params.timestamp);
+    console.log(begin);
+    const end = Number(req.params.timestamp) + 86400; // marge de 4 heures en plus
+    console.log(end);
+
+    const revenue = await Sessions.customQuery("SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
+    const debtTaken = await Sessions.customQuery("SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND isDebt = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
+
+    const paidSessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
+    const debtSessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 1 AND isPaid = 0 AND isDebt = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
+    const notPaidSessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 1 AND isPaid = 0 AND isDebt = 0 AND timestamp > ? AND timestamp < ?", [begin, end]);
+
+    return res.status(200).json({ success: true, revenue: revenue[0].total, debtTaken: debtTaken[0].total, paidSessions, debtSessions, notPaidSessions });
+  } catch (error) {
+    return res.status(500).json({ error: true, message: "Une erreur inconnue a eu lieu" });
+  }
+}
+
 exports.generateVoucherForDrinks = async (req, res) => {
   try {
     console.log("SCUMMMMMMM");

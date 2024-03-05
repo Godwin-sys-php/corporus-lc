@@ -31,5 +31,6 @@ router.put('/:id/printFoodsVoucher', existSession, isNotDone, sessionCtrl.genera
 router.get("/not-done", authUser, sessionCtrl.getNotDoneSessions);
 router.get("/not-done-server", authUser, sessionCtrl.getNotDoneSessionsFromUser);
 router.get("/one/:id", authUser, existSession, sessionCtrl.getOneSession);
+router.get("/report-day/:timestamp", authUser, sessionCtrl.getReportOfADay);
 
 module.exports = router;
