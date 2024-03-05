@@ -129,6 +129,52 @@ exports.createOutlet = async (req, res) => {
   }
 };
 
+exports.transferToBar = async (req, res) => {
+  try {
+    if (req._product.isVersatile === 1) {
+      return res.status(400).json({
+        error: true,
+        message:
+          "Vous ne pouvez pas sortir de transaction pour un produit versatile",
+      });
+    }
+    if (req._product.depotStock - Number(req.body.quantity) < 0) {
+      return res.status(400).json({
+        error: true,
+        message:
+          "Vous ne pouvez pas sortir plus de produits que ce que vous avez en stock",
+      });
+    }
+    const now = moment();
+    const toInsert = {
+      categoryId: req._ptCategory.id,
+      productId: req._product.id,
+      userId: req.user.id,
+      categoryName: req._ptCategory.name,
+      productName: req._product.name,
+      userName: req.user.name,
+      enter: 0,
+      outlet: Number(req.body.quantity),
+      after: req._product.depotStock - Number(req.body.quantity),
+      description: req.body.description,
+      timestamp: now.unix(),
+    };
+    await DTransactions.insertOne(toInsert);
+    await Products.update({ depotStock: Number(req._product.depotStock) - Number(req.body.quantity)}, { id: req._product.id });
+    const products = await DTransactions.customQuery("SELECT * FROM products WHERE isVersatile = 0");
+    const ptCategory = await DTransactions.customQuery(
+      "SELECT * FROM ptCategory WHERE isSystem = 0"
+    );
+    return res.status(200).json({
+      success: true,
+      message: "Sortie créée",
+      data: { products, ptCategory },
+    });
+  } catch (error) {
+    return res.status(500).json({ error: true, message: "Une erreur inconnue a eu lieu" });   
+  }
+}
+
 exports.getPrerequisities = async (req, res) => {
   try {
     const products = await DTransactions.customQuery("SELECT * FROM products WHERE isVersatile = 0");
