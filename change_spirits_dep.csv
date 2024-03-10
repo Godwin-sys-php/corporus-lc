@@ -1,0 +1,118 @@
+id;name;inStock;reel;depot
+92;Mesure de JAGERMEIFTER;12;13;15
+1;4 Cousins Chardonnay Blanc;2;3;6
+2;4 Cousins Rouge Merlot;5;3;6
+3;4 Cousins Sauvignon Blanc;8;8;6
+4;4 Cousins Sauvignon Rouge;3;3;9
+5;4 Cousins Sweet White;7;6;12
+6;Baron Blanc de Blancs;53;3;3
+10;Baron d'Arignac Medium Sweet;4;4;0
+7;Baron d'arignac Rosé;0;0;0
+8;Baron D'arignac rouge moelleux;0;0;3
+9;Baron D'arignac Rouge Sec;0;0;2
+11;BARON ICE;3;1;0
+12;Beluga Vodka Mesure;0;0;0
+13;Bonobo KwiluRhum Mesures;10;10;0
+15;Bouteille de AMARULA;0;0;2
+16;Bouteille de BAILEYS;1;1;2
+17;Bouteille de BLACK LABEL;2;2;4
+18;Bouteille de Black Label 37.5cl;6;5;3
+19;Bouteille de CHIVAS 12yrs;0;0;2
+20;Bouteille de CHIVAS 15ans;0;0;2
+21;Bouteille de CHIVAS 18ans;1;1;1
+22;Bouteille de Courvoisier;0;0;0
+23;Bouteille de DOUBLE BLACK 75cl;1;1;5
+25;Bouteille de GIN BOMBAY 75cl;0;0;0
+26;Bouteille de GIN GORDON;0;1;2
+27;Bouteille de HENNESSY VS;0;0;0
+28;Bouteille de J&B;1;1;2
+30;Bouteille de JACK DANIEL'S;0;9;3
+31;Bouteille de JACK DANIEL'S HONEY;1;1;0
+32;Bouteille de JAMSON;1;1;0
+33;Bouteille de MALIBU;1;1;1
+36;Bouteille de RED LABEL;1;1;6
+37;Bouteille de Red Label 37.5cl;3;2;12
+40;Bouteille Glenfiddich 12ans;0;0;0
+41;Bouteille Glenfiddich 15ans;0;0;1
+42;Bouteille Glenfiddich 18 yrs;1;1;2
+45;Bouteille Jack Daniels Gentleman 70 cl;1;1;1
+46;Bouteille Jack Daniels Single barrel;0;0;3
+47;Bouteille Johnny Walker Gold 75Cl;1;1;2
+48;Bouteille Martell Blue Swift;1;1;0
+49;Bouteille Martell VS;0;0;0
+51;Bouteille Sheridan's;0;0;0
+52;Bouteille Signore Prosecco;0;1;1
+53;Bouteille Sir Edward;6;7;4
+54;Champagne Billecart-Salmon Réserve;2;2;0
+55;Champagne Mercier Brut;0;0;0
+56;Champagne Veuve Clicquot Rosé;0;0;0
+57;Chivas 12Y Mesures;6;6;0
+58;Chivas 15 ans mesures;4;4;0
+295;Cocktail avec Alcool;0;0;0
+294;Cocktail Sans Alcool;2;0;0
+59;Cognac Bisquit Mesure;0;1;0
+61;DON OSCART BLANC DE BLANC;0;0;0
+62;DON OSCART BRUT;4;4;2
+63;DON OSCART ROSEE;1;1;0
+64;Glenfiddish 12Y 35cl;0;0;0
+65;L.-E Cabernet Sauvignon;4;3;3
+66;L.-E Merlot;4;6;5
+67;L.-E Sauvignon Blanc;6;4;9
+68;LAGAVULIN Mesures;5;5;0
+69;Martini sans Alcool;2;2;1
+70;Mateus;0;0;0
+71;Mesure d'Amarula;0;1;0
+72;Mesure de Absolut VODKA;0;0;0
+73;Mesure de Bacardi Blanc;13;6;0
+74;Mesure de Bacardi Brun;0;0;0
+75;Mesure de Baileys;11;1;0
+76;Mesure de Black Label;32;6;0
+77;Mesure de Blue Label;4;5;24
+78;Mesure de Campari;3;3;0
+79;Mesure de CAPITAINE MORGAN;10;10;0
+80;Mesure de Cassis;10;10;0
+81;Mesure de Cinzano Bianco;7;7;0
+82;Mesure de COINTREAU;0;0;0
+83;Mesure de DISARONNO;8;8;11
+84;Mesure de DOUBLE BLACK;6;6;0
+85;Mesure de GET 27;8;8;0
+86;Mesure de GIN BOMBAY;16;4;0
+87;Mesure de GIN GORDON;2;2;0
+88;Mesure de HENNESSY VS;15;2;0
+89;Mesure de J&B;5;6;0
+90;Mesure de JACK DANIEL'S HONEY;10;10;0
+91;Mesure de JACK DANIELS;8;9;0
+93;Mesure de JAMSON;6;6;0
+94;Mesure de LIMONCELLO;5;5;0
+95;Mesure de MALIBU;7;7;0
+96;Mesure de MARTINI BLANC;12;14;0
+97;Mesure de MARTINI ROUGE;2;2;0
+98;Mesure de RED LABEL;14;14;0
+99;Mesure de Sheridan's;1;1;0
+100;Mesure de TEQUILA Camilo;26;23;0
+101;Mesure Glenfiddish 12 ans;9;9;0
+102;Mesure Grundheim;18;18;0
+103;Mesure Jack Daniel Single Barrel;8;8;0
+104;Mesure Martel VS;19;8;0
+105;Mesure Martell Blue Swift;0;11;0
+106;Mesure Triple Sec;0;0;0
+107;Mesures de Tequila Anejo Patron;10;10;0
+108;Mesures Glenfiddich 15ans;12;12;0
+109;Mesures Grand Marnier;7;7;0
+110;Mesures Grant's 1L;15;15;0
+111;MOET BRUT 75cl;5;4;4
+112;Moet Brut Moyen;5;5;0
+113;MOET ICE;0;0;2
+114;Papillon Brut;4;4;2
+115;Papillon Demi Sec;1;1;0
+116;Pierre Grandet;1;1;0
+117;Ruinart Blanc de Blancs;1;1;0
+118;Ruinart Brut;1;1;0
+119;Ruinart Petit Brut;0;0;1
+120;Shot de Olmeca Chocolate;3;3;0
+121;Shot de Olmeca Sivler;17;17;0
+122;Sir Edward Smoky;0;1;0
+123;Vin Baron d'arignac Sec;1;1;0
+124;Vin Blanc Domaine de Baume;1;1;0
+125;Vin Rouge Celier D'Or sec;1;1;0
+128;Vin Rouge Haut de Medoc;0;;0
