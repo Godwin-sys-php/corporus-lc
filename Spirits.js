@@ -1,9 +1,9 @@
 const fs = require('fs');
 const csv = require('csv-parser');
 
-const sqlFile = fs.createWriteStream('boissons.sql');
+const sqlFile = fs.createWriteStream('spirits.sql');
 
-fs.createReadStream('change_bois_2.csv')
+fs.createReadStream('change_spirits_2.csv')
   .pipe(csv({separator: ';'}))
   .on('data', (row) => {
     // Créer la requête INSERT pour chaque ligne

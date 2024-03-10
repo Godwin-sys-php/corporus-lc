@@ -4,6 +4,8 @@ const MTransactions = require("../Models/MTransactions");
 const moment = require("moment");
 const MCategory = require("../Models/MCategory");
 const MAccount = require("../Models/MAccount");
+const PTCategory = require("../Models/PTCategory");
+const Transactions = require("../Models/Transactions");
 
 exports.createEnter = async (req, res) => {
   try {
@@ -131,6 +133,11 @@ exports.createOutlet = async (req, res) => {
 
 exports.transferToBar = async (req, res) => {
   try {
+    const product = await Products.find({ id: req.body.productId });
+    if (product.length === 0) {
+      return res.status(400).json({ error: true, message: "Produit inexistant" });
+    }
+    req._product = product[0];
     if (req._product.isVersatile === 1) {
       return res.status(400).json({
         error: true,
@@ -146,21 +153,42 @@ exports.transferToBar = async (req, res) => {
       });
     }
     const now = moment();
-    const toInsert = {
-      categoryId: req._ptCategory.id,
+    const categoryTransfer = await PTCategory.find({ id: 5 });
+    const categoryReception = await PTCategory.find({ id: 6 });
+
+    const toInsert1 = {
+      categoryId: categoryTransfer[0].id,
       productId: req._product.id,
       userId: req.user.id,
-      categoryName: req._ptCategory.name,
+      categoryName: categoryTransfer[0].name,
       productName: req._product.name,
       userName: req.user.name,
       enter: 0,
       outlet: Number(req.body.quantity),
       after: req._product.depotStock - Number(req.body.quantity),
-      description: req.body.description,
+      description: "Transfert vers bars",
       timestamp: now.unix(),
     };
-    await DTransactions.insertOne(toInsert);
-    await Products.update({ depotStock: Number(req._product.depotStock) - Number(req.body.quantity)}, { id: req._product.id });
+
+    const toInsert2 = {
+      categoryId: categoryReception[0].id,
+      productId: req._product.id,
+      userId: req.user.id,
+      categoryName: categoryReception[0].name,
+      productName: req._product.name,
+      userName: req.user.name,
+      enter: Number(req.body.quantity),
+      outlet: 0,
+      after: req._product.inStock - Number(req.body.quantity),
+      description: "Reception depuis dépot",
+      timestamp: now.unix(),
+    }
+
+    await DTransactions.insertOne(toInsert1);
+    await Transactions.insertOne(toInsert2);
+    await Products.update({ depotStock: Number(req._product.depotStock) - Number(req.body.quantity), inStock: Number(req._product.inStock) + Number(req.body.quantity)}, { id: req._product.id });
+
+
     const products = await DTransactions.customQuery("SELECT * FROM products WHERE isVersatile = 0");
     const ptCategory = await DTransactions.customQuery(
       "SELECT * FROM ptCategory WHERE isSystem = 0"

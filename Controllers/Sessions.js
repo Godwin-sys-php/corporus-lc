@@ -664,7 +664,7 @@ exports.paySession = async (req, res) => {
       { id: accountData[0].id }
     );
 
-    await Sessions.update({ isPaid: 1 }, { id: req.params.id });
+    await Sessions.update({ isPaid: 1, accountName: accountData[0].name, accountId: accountData[0].id, }, { id: req.params.id });
 
     const sessions = await Sessions.customQuery(
       "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
@@ -706,6 +706,125 @@ exports.paySession = async (req, res) => {
       .json({ error: true, message: "Une erreur inconnue a eu lieu" });
   }
 };
+
+exports.removeIsDone = async (req, res) => {
+  try {
+    await Sessions.update({ isDone: 0, }, { id: req.params.id });
+    const sessions = await Sessions.customQuery(
+      "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+      []
+    );
+    const session = await Sessions.find({ id: req.params.id });
+    const items = await SessionItems.customQuery(
+      "SELECT * FROM sessionItems WHERE sessionId = ?",
+      [req.params.id]
+    );
+
+    req.app
+      .get("socketService")
+      .broadcastEmiter(JSON.stringify(sessions), "new-session");
+    req.app
+      .get("socketService")
+      .broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Annulation facture",
+        sessions,
+        session: session[0],
+        items,
+      });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ error: true, message: "Une erreur inconnue a eu lieu" });
+  }    
+}
+
+exports.removePayment = async (req, res) => {
+  try {
+    const now = moment();
+    const defaultCategory = await MCategory.customQuery(
+      "SELECT * FROM mCategory WHERE id = 1"
+    );
+    const accountData = await MAccount.find({ id: req._session.accountId });
+    if (accountData === undefined || accountData.length === 0) {
+      return res
+        .status(400)
+        .json({ error: true, message: "Compte inexistant" });
+    }
+
+    const toInsert = {
+      categoryId: defaultCategory[0].id,
+      accountId: accountData[0].id,
+      userId: req.user.id,
+      categoryName: defaultCategory[0].name,
+      userName: req.user.name,
+      accountName: accountData[0].name,
+      enter: 0,
+      outlet: req._session.total - req._session.reduction,
+      after: accountData[0].amount - (req._session.total - req._session.reduction),
+      description: `Annulation paiement facture ; ID: ${req.params.id}`,
+      timestamp: now.unix(),
+    };
+    await MTransactions.insertOne(toInsert);
+    await MAccount.update(
+      { amount: toInsert.after },
+      { id: accountData[0].id }
+    );
+
+    await Sessions.update({ isPaid: 0, accountName: null, accountId: null, }, { id: req.params.id });
+
+    const sessions = await Sessions.customQuery(
+      "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+      []
+    );
+    const session = await Sessions.find({ id: req.params.id });
+    const items = await SessionItems.customQuery(
+      "SELECT * FROM sessionItems WHERE sessionId = ?",
+      [req.params.id]
+    );
+
+    req.app
+      .get("socketService")
+      .broadcastEmiter(JSON.stringify(sessions), "new-session");
+    req.app
+      .get("socketService")
+      .broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Annulation paiement",
+        sessions,
+        session: session[0],
+        items,
+      });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ error: true, message: "Une erreur inconnue a eu lieu" });
+  }
+}
 
 exports.getNotDoneSessions = async (req, res) => {
   try {

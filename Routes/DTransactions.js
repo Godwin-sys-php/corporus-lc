@@ -7,6 +7,7 @@ const validatorTransactions = require("../Middlewares/Validators/validatorTransa
 
 router.post("/enter", authManager, validatorTransactions, transactionCtrl.createEnter);
 router.post("/outlet", authManager, validatorTransactions, transactionCtrl.createOutlet);
+router.post("/transfer", authManager, transactionCtrl.transferToBar);
 
 router.get("/period/:start/:end", authManager, transactionCtrl.getTransactionsOnPeriod);
 router.get("/prerequisities", authManager, transactionCtrl.getPrerequisities);
