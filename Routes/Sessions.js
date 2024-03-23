@@ -28,6 +28,9 @@ router.put("/:id/debt", authUser, existSession, isDone, sessionCtrl.debtSession)
 router.put('/:id/printDrinksVoucher', existSession, isNotDone, sessionCtrl.generateVoucherForDrinks); 
 router.put('/:id/printFoodsVoucher', existSession, isNotDone, sessionCtrl.generateVoucherForFoods);
 
+router.put("/:id/remove-is-paid", authAdmin, existSession, isDone, sessionCtrl.removePayment);
+router.put("/:id/remove-is-done", authAdmin, existSession, isDone, sessionCtrl.removeIsDone);
+
 router.get("/not-done", authUser, sessionCtrl.getNotDoneSessions);
 router.get("/not-done-server", authUser, sessionCtrl.getNotDoneSessionsFromUser);
 router.get("/one/:id", authUser, existSession, sessionCtrl.getOneSession);

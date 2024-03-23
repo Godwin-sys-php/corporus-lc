@@ -910,14 +910,19 @@ exports.getReportOfADay = async (req, res) => {
     console.log(end);
 
     const revenue = await Sessions.customQuery("SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
-    const debtTaken = await Sessions.customQuery("SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND isDebt = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
+    const revenueForEachAccount = await Sessions.customQuery("SELECT accountId, accountName, SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ? GROUP BY accountId", [begin, end]);
+
+    const debtTaken = await Sessions.customQuery("SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isDebt = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
 
     const paidSessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
     const debtSessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 1 AND isPaid = 0 AND isDebt = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
     const notPaidSessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 1 AND isPaid = 0 AND isDebt = 0 AND timestamp > ? AND timestamp < ?", [begin, end]);
 
-    return res.status(200).json({ success: true, revenue: revenue[0].total, debtTaken: debtTaken[0].total, paidSessions, debtSessions, notPaidSessions });
+    const selledItems = await SessionItems.customQuery("SELECT sum(quantity), productName, id FROM sessionItems WHERE timestamp > ? AND timestamp < ? GROUP by id", [begin, end]);
+
+    return res.status(200).json({ success: true, revenue: revenue[0].total, debtTaken: debtTaken[0].total, paidSessions, debtSessions, notPaidSessions, revenueForEachAccount, selledItems, });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: true, message: "Une erreur inconnue a eu lieu" });
   }
 }
