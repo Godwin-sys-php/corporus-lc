@@ -918,7 +918,7 @@ exports.getReportOfADay = async (req, res) => {
     const debtSessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 1 AND isPaid = 0 AND isDebt = 1 AND timestamp > ? AND timestamp < ?", [begin, end]);
     const notPaidSessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 1 AND isPaid = 0 AND isDebt = 0 AND timestamp > ? AND timestamp < ?", [begin, end]);
 
-    const selledItems = await SessionItems.customQuery("SELECT sum(quantity) as quantity, productName, id FROM sessionItems WHERE timestamp > ? AND timestamp < ? GROUP by id", [begin, end]);
+    const selledItems = await SessionItems.customQuery("SELECT sum(quantity) as quantity, productName, id FROM sessionItems WHERE timestamp > ? AND timestamp < ? GROUP by productId", [begin, end]);
 
     return res.status(200).json({ success: true, revenue: revenue[0].total, debtTaken: debtTaken[0].total, paidSessions, debtSessions, notPaidSessions, revenueForEachAccount, selledItems, });
   } catch (error) {
