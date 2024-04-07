@@ -8,7 +8,7 @@ fs.createReadStream('boissons_7avr.csv')
   .on('data', (row) => {
     // Créer la requête INSERT pour chaque ligne
 
-      const insertQuery = `UPDATE products SET inStock = ${Number(row["bar-reel"])} where id=${Number(row.id)};\n`;
+      const insertQuery = `UPDATE products SET depotStock = ${Number(row["depot-reel"])} where id=${Number(row.id)};\n`;
       
       // Écrire la requête dans le fichier SQL
       sqlFile.write(insertQuery);
