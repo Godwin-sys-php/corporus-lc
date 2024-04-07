@@ -12,6 +12,11 @@ fs.createReadStream('plats_7avr.csv')
         
         // Écrire la requête dans le fichier SQL
         sqlFile.write(insertQuery);
+      } else {
+        const insertQuery = `UPDATE products SET inStock = 0 where id=${Number(row.id)};\n`;
+        
+        // Écrire la requête dans le fichier SQL
+        sqlFile.write(insertQuery);
       }
   })
   .on('end', () => {
