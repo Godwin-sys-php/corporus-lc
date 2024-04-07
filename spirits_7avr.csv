@@ -1,0 +1,118 @@
+id;name;bar;bar-reel;depot;depot-reel
+1;4 Cousins Chardonnay Blanc;1;3;6;0
+301;4 cousins marule;9;1;0;0
+2;4 Cousins Rouge Merlot;6;7;6;0
+3;4 Cousins Sauvignon Blanc;3;7;6;0
+4;4 Cousins Sauvignon Rouge;7;3;9;0
+302;4 cousins strawberry hilles;12;0;0;0
+5;4 Cousins Sweet White;5;4;12;0
+6;Baron Blanc de Blancs;3;3;3;0
+10;Baron d'Arignac Medium Sweet;3;2;0;0
+7;Baron d'arignac Rosé;0;0;0;0
+8;Baron D'arignac rouge moelleux;3;0;3;0
+9;Baron D'arignac Rouge Sec;0;0;2;0
+11;BARON ICE;3;3;0;0
+12;Beluga Vodka Mesure;0;0;0;0
+13;Bonobo KwiluRhum Mesures;10;10;0;0
+15;Bouteille de AMARULA;0;0;2;0
+16;Bouteille de BAILEYS;0;0;2;0
+17;Bouteille de BLACK LABEL;0;0;4;0
+18;Bouteille de Black Label 37.5cl;5;5;3;0
+19;Bouteille de CHIVAS 12yrs;0;0;2;0
+20;Bouteille de CHIVAS 15ans;0;0;2;0
+21;Bouteille de CHIVAS 18ans;1;1;1;0
+22;Bouteille de Courvoisier;0;0;0;0
+23;Bouteille de DOUBLE BLACK 75cl;1;0;5;0
+25;Bouteille de GIN BOMBAY 75cl;1;0;0;0
+26;Bouteille de GIN GORDON;1;0;2;0
+27;Bouteille de HENNESSY VS;1;0;3;0
+28;Bouteille de J&B;1;0;2;0
+30;Bouteille de JACK DANIEL'S;0;0;3;0
+31;Bouteille de JACK DANIEL'S HONEY;1;0;0;0
+32;Bouteille de JAMSON;0;0;0;0
+33;Bouteille de MALIBU;1;0;1;0
+36;Bouteille de RED LABEL;0;0;6;0
+37;Bouteille de Red Label 37.5cl;2;2;12;0
+40;Bouteille Glenfiddich 12ans;0;0;2;0
+41;Bouteille Glenfiddich 15ans;0;0;1;0
+42;Bouteille Glenfiddich 18 yrs;1;1;2;0
+45;Bouteille Jack Daniels Gentleman 70 cl;1;1;1;0
+46;Bouteille Jack Daniels Single barrel;2;0;3;0
+47;Bouteille Johnny Walker Gold 75Cl;2;1;2;0
+48;Bouteille Martell Blue Swift;1;0;0;0
+49;Bouteille Martell VS;0;0;0;0
+51;Bouteille Sheridan's;0;0;0;0
+52;Bouteille Signore Prosecco;3;3;11;0
+53;Bouteille Sir Edward;4;4;4;0
+54;Champagne Billecart-Salmon Réserve;2;2;0;0
+55;Champagne Mercier Brut;0;0;0;0
+56;Champagne Veuve Clicquot Rosé;0;0;0;0
+57;Chivas 12Y Mesures;17;18;0;0
+58;Chivas 15 ans mesures;7;8;0;0
+295;Cocktail avec Alcool;3;0;0;0
+294;Cocktail Sans Alcool;0;0;0;0
+59;Cognac Bisquit Mesure;1;1;0;0
+61;DON OSCART BLANC DE BLANC;0;0;0;0
+62;DON OSCART BRUT;4;4;2;0
+63;DON OSCART ROSEE;1;1;0;0
+65;L.-E Cabernet Sauvignon;4;4;3;0
+66;L.-E Merlot;9;6;5;0
+67;L.-E Sauvignon Blanc;3;3;9;0
+68;LAGAVULIN Mesures;5;5;0;0
+69;Martini sans Alcool;2;2;1;0
+70;Mateus;0;0;0;0
+71;Mesure d'Amarula;12;13;0;0
+72;Mesure de Absolut VODKA;13;14;0;0
+73;Mesure de Bacardi Blanc;17;14;0;0
+74;Mesure de Bacardi Brun;0;0;0;0
+75;Mesure de Baileys;4;5;0;0
+76;Mesure de Black Label;17;17;0;0
+77;Mesure de Blue Label;12;12;24;0
+78;Mesure de Campari;0;1;0;0
+79;Mesure de CAPITAINE MORGAN;0;3;0;0
+80;Mesure de Cassis;10;8;0;0
+81;Mesure de Cinzano Bianco;7;7;0;0
+82;Mesure de COINTREAU;8;9;0;0
+83;Mesure de DISARONNO;11;8;11;0
+84;Mesure de DOUBLE BLACK;10;21;0;0
+85;Mesure de GET 27;8;10;0;0
+86;Mesure de GIN BOMBAY;10;17;0;0
+87;Mesure de GIN GORDON;11;10;0;0
+88;Mesure de HENNESSY VS;2;12;0;0
+89;Mesure de J&B;0;12;0;0
+90;Mesure de JACK DANIEL'S HONEY;10;21;0;0
+91;Mesure de JACK DANIELS;17;17;0;0
+92;Mesure de JAGERMEIFTER;2;3;15;0
+93;Mesure de JAMSON;0;12;0;0
+94;Mesure de LIMONCELLO;4;4;0;0
+95;Mesure de MALIBU;3;13;0;0
+96;Mesure de MARTINI BLANC;14;14;0;0
+97;Mesure de MARTINI ROUGE;2;14;0;0
+98;Mesure de RED LABEL;11;18;0;0
+99;Mesure de Sheridan's;1;2;0;0
+100;Mesure de TEQUILA Camilo;6;16;0;0
+101;Mesure Glenfiddish 12 ans;3;11;0;0
+102;Mesure Grundheim;15;18;0;0
+103;Mesure Jack Daniel Single Barrel;7;27;0;0
+104;Mesure Martel VS;1;13;0;0
+105;Mesure Martell Blue Swift;11;11;0;0
+106;Mesure Triple Sec;12;10;0;0
+107;Mesures de Tequila Anejo Patron;8;14;0;0
+108;Mesures Glenfiddich 15ans;11;3;0;0
+109;Mesures Grand Marnier;7;7;0;0
+110;Mesures Grant's 1L;11;10;0;0
+111;MOET BRUT 75cl;4;4;4;0
+112;Moet Brut Moyen;6;6;0;0
+113;MOET ICE;0;0;2;0
+114;Papillon Brut;3;3;2;0
+115;Papillon Demi Sec;4;4;0;0
+116;Pierre Grandet;0;0;0;0
+117;Ruinart Blanc de Blancs;1;2;0;0
+118;Ruinart Brut;1;2;0;0
+119;Ruinart Petit Brut;0;0;1;0
+120;Shot de Olmeca Chocolate;3;5;0;0
+121;Shot de Olmeca Sivler;9;6;0;0
+122;Sir Edward Smoky;0;0;0;0
+123;Vin Baron d'arignac Sec;1;1;0;0
+124;Vin Blanc Domaine de Baume;1;0;0;0
+125;Vin Rouge Celier D'Or sec;1;0;0;0
