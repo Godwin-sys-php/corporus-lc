@@ -3,7 +3,7 @@ const csv = require('csv-parser');
 
 const sqlFile = fs.createWriteStream('kit.sql');
 
-fs.createReadStream('change_kit_2.csv')
+fs.createReadStream('plats_7avr.csv')
   .pipe(csv({separator: ';'}))
   .on('data', (row) => {
     // Créer la requête INSERT pour chaque ligne
