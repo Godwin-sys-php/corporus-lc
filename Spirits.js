@@ -3,12 +3,12 @@ const csv = require('csv-parser');
 
 const sqlFile = fs.createWriteStream('spirits.sql');
 
-fs.createReadStream('spirits_dept_7avr.csv')
+fs.createReadStream('s_28_avr.csv')
   .pipe(csv({separator: ';'}))
   .on('data', (row) => {
     // Créer la requête INSERT pour chaque ligne
 
-      const insertQuery = `UPDATE products SET depotStock = ${Number(row["reel"])} where id=${Number(row.id)};\n`;
+      const insertQuery = `UPDATE products SET inStock = ${Number(row["reel"])} where id=${Number(row.id)};\n`;
       
       // Écrire la requête dans le fichier SQL
       sqlFile.write(insertQuery);
