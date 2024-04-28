@@ -1112,3 +1112,17 @@ exports.generateVoucherForFoods = async (req, res) => {
     return res.status(500).json({ error: true });
   }
 };
+
+exports.getVouchersPrintWork = async (req, res) => {
+  try {
+    const vouchers = await Sessions.customQuery(
+      "SELECT * FROM vouchers WHERE timestamp >= ? ORDER BY id DESC",
+      [moment().startOf("day").unix()]
+    );
+
+    return res.status(200).json({ success: true, vouchers: vouchers });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: true, message: "Une erreur inconnue a eu lieu" });
+  }
+};

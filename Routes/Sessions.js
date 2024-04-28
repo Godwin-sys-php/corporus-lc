@@ -32,6 +32,7 @@ router.put("/:id/remove-is-paid", authAdmin, existSession, isDone, sessionCtrl.r
 router.put("/:id/remove-is-done", authAdmin, existSession, isDone, sessionCtrl.removeIsDone);
 
 router.get("/not-done", authUser, sessionCtrl.getNotDoneSessions);
+router.get("/voucher-print", authUser, sessionCtrl.getVouchersPrintWork);
 router.get("/not-done-server", authUser, sessionCtrl.getNotDoneSessionsFromUser);
 router.get("/one/:id", authUser, existSession, sessionCtrl.getOneSession);
 router.get("/report-day/:timestamp", authUser, sessionCtrl.getReportOfADay);

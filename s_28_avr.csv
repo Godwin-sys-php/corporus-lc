@@ -1,0 +1,122 @@
+id;name;inStock;reel;ecart
+1;4 Cousins Chardonnay Blanc;2;2;0
+301;4 cousins marule;0;0;0
+2;4 Cousins Rouge Merlot;3;3;0
+3;4 Cousins Sauvignon Blanc;6;6;0
+4;4 Cousins Sauvignon Rouge;4;4;0
+302;4 cousins strawberry hilles;2;2;0
+5;4 Cousins Sweet White;2;2;0
+6;Baron Blanc de Blancs;0;0;0
+10;Baron d'Arignac Medium Sweet;3;3;0
+7;Baron d'arignac Rosé;0;0;0
+8;Baron D'arignac rouge moelleux;0;0;0
+9;Baron D'arignac Rouge Sec;0;0;0
+11;BARON ICE;0;0;0
+12;Beluga Vodka Mesure;0;0;0
+13;Bonobo KwiluRhum Mesures;10;10;0
+15;Bouteille de AMARULA;0;0;0
+16;Bouteille de BAILEYS;0;0;0
+17;Bouteille de BLACK LABEL;0;0;0
+18;Bouteille de Black Label 37.5cl;3;3;0
+19;Bouteille de CHIVAS 12yrs;0;0;0
+20;Bouteille de CHIVAS 15ans;0;0;0
+21;Bouteille de CHIVAS 18ans;1;1;0
+22;Bouteille de Courvoisier;0;0;0
+23;Bouteille de DOUBLE BLACK 75cl;2;0;-2
+25;Bouteille de GIN BOMBAY 75cl;0;0;0
+26;Bouteille de GIN GORDON;1;0;-1
+27;Bouteille de HENNESSY VS;0;0;0
+28;Bouteille de J&B;1;0;-1
+30;Bouteille de JACK DANIEL'S;0;0;0
+31;Bouteille de JACK DANIEL'S HONEY;0;0;0
+32;Bouteille de JAMSON;1;0;-1
+33;Bouteille de MALIBU;0;0;0
+36;Bouteille de RED LABEL;0;0;0
+37;Bouteille de Red Label 37.5cl;1;1;0
+40;Bouteille Glenfiddich 12ans;0;0;0
+41;Bouteille Glenfiddich 15ans;0;0;0
+42;Bouteille Glenfiddich 18 yrs;1;1;0
+45;Bouteille Jack Daniels Gentleman 70 cl;1;1;0
+46;Bouteille Jack Daniels Single barrel;11;0;-11
+47;Bouteille Johnny Walker Gold 75Cl;0;0;0
+48;Bouteille Martell Blue Swift;0;0;0
+49;Bouteille Martell VS;0;0;0
+51;Bouteille Sheridan's;0;0;0
+52;Bouteille Signore Prosecco;0;0;0
+53;Bouteille Sir Edward;4;4;0
+54;Champagne Billecart-Salmon Réserve;1;1;0
+55;Champagne Mercier Brut;0;0;0
+56;Champagne Veuve Clicquot Rosé;0;0;0
+57;Chivas 12Y Mesures;13;14;1
+58;Chivas 15 ans mesures;8;8;0
+295;Cocktail avec Alcool;4;4;0
+294;Cocktail Sans Alcool;2;2;0
+59;Cognac Bisquit Mesure;1;1;0
+61;DON OSCART BLANC DE BLANC;0;0;0
+62;DON OSCART BRUT;3;3;0
+63;DON OSCART ROSEE;1;1;0
+309;L.-E Bordeaux Blanc;2;1;-1
+65;L.-E Cabernet Sauvignon;0;0;0
+66;L.-E Merlot;2;2;0
+67;L.-E Sauvignon Blanc;2;3;1
+68;LAGAVULIN Mesures;5;5;0
+69;Martini sans Alcool;2;2;0
+71;Mesure d'Amarula;10;10;0
+72;Mesure de Absolut VODKA;10;10;0
+73;Mesure de Bacardi Blanc;0;0;0
+74;Mesure de Bacardi Brun;0;0;0
+75;Mesure de Baileys;9;9;0
+76;Mesure de Black Label;33;29;-4
+77;Mesure de Blue Label;9;8;-1
+78;Mesure de Campari;11;11;0
+79;Mesure de CAPITAINE MORGAN;1;2;1
+80;Mesure de Cassis;8;8;0
+81;Mesure de Cinzano Bianco;7;6;-1
+82;Mesure de COINTREAU;6;6;0
+83;Mesure de DISARONNO;4;4;0
+84;Mesure de DOUBLE BLACK;19;42;23
+85;Mesure de GET 27;10;10;0
+86;Mesure de GIN BOMBAY;18;18;0
+87;Mesure de GIN GORDON;0;12;12
+310;Mesure de Gold Label;8;8;0
+312;Mesure de Henessy VSOP;3;5;2
+88;Mesure de HENNESSY VS;22;22;0
+89;Mesure de J&B;10;22;12
+90;Mesure de JACK DANIEL'S HONEY;19;20;1
+91;Mesure de JACK DANIELS;25;24;-1
+92;Mesure de JAGERMEIFTER;4;4;0
+93;Mesure de JAMSON;9;21;12
+94;Mesure de LIMONCELLO;4;4;0
+95;Mesure de MALIBU;13;13;0
+96;Mesure de MARTINI BLANC;14;14;0
+97;Mesure de MARTINI ROUGE;14;14;0
+98;Mesure de RED LABEL;8;7;-1
+313;Mesure de RICARD;4;4;0
+99;Mesure de Sheridan's;0;0;0
+100;Mesure de TEQUILA Camilo;16;18;2
+101;Mesure Glenfiddish 12 ans;3;3;0
+102;Mesure Grundheim;17;13;-4
+103;Mesure Jack Daniel Single Barrel;2;13;11
+104;Mesure Martel VS;13;13;0
+105;Mesure Martell Blue Swift;21;20;-1
+106;Mesure Triple Sec;9;9;0
+107;Mesures de Tequila Anejo Patron;13;12;-1
+108;Mesures Glenfiddich 15ans;12;12;0
+109;Mesures Grand Marnier;7;7;0
+110;Mesures Grant's 1L;6;6;0
+111;MOET BRUT 75cl;8;8;0
+112;Moet Brut Moyen;3;3;0
+113;MOET ICE;0;0;0
+114;Papillon Brut;3;3;0
+115;Papillon Demi Sec;2;2;0
+116;Pierre Grandet;0;0;0
+117;Ruinart Blanc de Blancs;2;2;0
+118;Ruinart Brut;1;1;0
+119;Ruinart Petit Brut;0;0;0
+120;Shot de Olmeca Chocolate;3;6;3
+121;Shot de Olmeca Sivler;16;17;1
+311;Shot de Tequila Jose Cuervo;16;21;5
+122;Sir Edward Smoky;0;0;0
+123;Vin Baron d'arignac Sec;0;1;1
+124;Vin Blanc Domaine de Baume;0;0;0
+125;Vin Rouge Celier D'Or sec;0;1;1
