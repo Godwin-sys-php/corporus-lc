@@ -36,5 +36,6 @@ router.get("/voucher-print", authUser, sessionCtrl.getVouchersPrintWork);
 router.get("/not-done-server", authUser, sessionCtrl.getNotDoneSessionsFromUser);
 router.get("/one/:id", authUser, existSession, sessionCtrl.getOneSession);
 router.get("/report-day/:timestamp", authUser, sessionCtrl.getReportOfADay);
+router.get("/report-period/:begin/:end", authUser, sessionCtrl.getReportOfAPeriod);
 
 module.exports = router;
