@@ -15,8 +15,6 @@ const path = require("path");
 const ejs = require("ejs");
 const pdf = require("html-pdf");
 
-require("dotenv").config();
-
 exports.startNewSession = async (req, res) => {
   try {
     const now = moment();
@@ -68,6 +66,142 @@ exports.startNewSession = async (req, res) => {
 
 exports.addItem = async (req, res) => {
   try {
+    if (req._product.hasLink) {
+      const links = await Products.customQuery(
+        "SELECT * FROM linkedProduct WHERE productLinkId = ?",
+        [req._product.id]
+      );
+      let linkedProducts = [];
+      for (let index2 in links) {
+        const product = await Products.find({ id: links[index2].productId });
+        if (product[0].inStock - links[index2].quantity < 0) {
+          return res.status(400).json({
+            error: true,
+            message: `Stock insuffisant pour ${product[0].name}`,
+          });
+        }
+        linkedProducts.push({
+          ...product[0],
+          quantity: links[index2].quantity,
+        });
+      }
+      const now = moment();
+      const defaultCategory = await PTCategory.customQuery(
+        "SELECT * FROM ptCategory WHERE id = 1"
+      );
+      const toInsert = {
+        userId: req.user.id,
+        userName: req.user.name,
+        sessionId: req.params.id,
+        productId: req._product.id,
+        productName: req._product.name,
+        quantity: Number(req.body.quantity),
+        price: req._product.price,
+        timestamp: now.unix(),
+      };
+      await SessionItems.insertOne(toInsert);
+      await Sessions.update(
+        { total: req._session.total + req._product.price * req.body.quantity },
+        { id: req.params.id }
+      );
+      // now, make transactions for linked product
+      for (let index in linkedProducts) {
+        const el = linkedProducts[index];
+        const toInsertTransactions = {
+          sessionId: req.params.id,
+          categoryId: defaultCategory[0].id,
+          productId: el.id,
+          userId: req.user.id,
+          categoryName: defaultCategory[0].name,
+          productName: el.name,
+          userName: req.user.name,
+          enter: 0,
+          outlet: Number(el.quantity),
+          after: el.inStock - Number(el.quantity),
+          description: `Vente de ${req._product.name}`,
+          timestamp: now.unix(),
+        };
+        await Transactions.insertOne(toInsertTransactions);
+        await Products.update(
+          { inStock: el.inStock - Number(el.quantity) },
+          { id: el.id }
+        );
+      }
+      const sessions = await Sessions.customQuery(
+        "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+        []
+      );
+      const session = await Sessions.find({ id: req.params.id });
+      const items = await SessionItems.customQuery(
+        "SELECT * FROM sessionItems WHERE sessionId = ?",
+        [req.params.id]
+      );
+      req.app
+        .get("socketService")
+        .broadcastEmiter(JSON.stringify(sessions), "new-session");
+      req.app.get("socketService").broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Article ajouté",
+        sessions,
+        session: session[0],
+        items,
+      });
+    }
+    if (req._product.isVersatile) {
+      const now = moment();
+      const toInsert = {
+        userId: req.user.id,
+        userName: req.user.name,
+        sessionId: req.params.id,
+        productId: req._product.id,
+        productName: req._product.name,
+        quantity: Number(req.body.quantity),
+        price: req._product.price,
+        timestamp: now.unix(),
+      };
+      await SessionItems.insertOne(toInsert);
+      await Sessions.update(
+        { total: req._session.total + req._product.price * req.body.quantity },
+        { id: req.params.id }
+      );
+      const sessions = await Sessions.customQuery(
+        "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+        []
+      );
+      const session = await Sessions.find({ id: req.params.id });
+      const items = await SessionItems.customQuery(
+        "SELECT * FROM sessionItems WHERE sessionId = ?",
+        [req.params.id]
+      );
+      req.app
+        .get("socketService")
+        .broadcastEmiter(JSON.stringify(sessions), "new-session");
+      req.app.get("socketService").broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Article ajouté",
+        sessions,
+        session: session[0],
+        items,
+      });
+    }
     if (req._product.inStock - req.body.quantity < 0) {
       return res
         .status(400)
@@ -155,6 +289,116 @@ exports.removeItem = async (req, res) => {
     const defaultCategory = await PTCategory.customQuery(
       "SELECT * FROM ptCategory WHERE id = 3"
     );
+    if (req._product.hasLink) {
+      const links = await Products.customQuery(
+        "SELECT * FROM linkedProduct WHERE productLinkId = ?",
+        [req._product.id]
+      );
+      let linkedProducts = [];
+      for (let index2 in links) {
+        const product = await Products.find({ id: links[index2].productId });
+        linkedProducts.push({
+          ...product[0],
+          quantity: links[index2].quantity,
+        });
+      }
+
+      for (let index in linkedProducts) {
+        const el = linkedProducts[index];
+        const toInsertTransactions = {
+          sessionId: req.params.id,
+          categoryId: defaultCategory[0].id,
+          productId: el.id,
+          userId: req.user.id,
+          categoryName: defaultCategory[0].name,
+          productName: el.name,
+          userName: req.user.name,
+          enter: Number(el.quantity),
+          outlet: 0,
+          after: el.inStock + Number(el.quantity),
+          description: `Retour de ${req._item.productName}`,
+          timestamp: now.unix(),
+        };
+        await Transactions.insertOne(toInsertTransactions);
+        await Products.update(
+          { inStock: el.inStock + Number(el.quantity) },
+          { id: el.id }
+        );
+      }
+
+      await SessionItems.delete({ id: req._item.id });
+      await Sessions.update(
+        { total: req._session.total - req._item.price * req._item.quantity },
+        { id: req.params.id }
+      );
+
+      const sessions = await Sessions.customQuery(
+        "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+        []
+      );
+      const session = await Sessions.find({ id: req.params.id });
+      const items = await SessionItems.customQuery(
+        "SELECT * FROM sessionItems WHERE sessionId = ?",
+        [req.params.id]
+      );
+
+      req.app
+        .get("socketService")
+        .broadcastEmiter(JSON.stringify(sessions), "new-session");
+      req.app.get("socketService").broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Article retiré",
+        sessions,
+        session: session[0],
+        items,
+      });
+    }
+    if (req._product.isVersatile) {
+      await SessionItems.delete({ id: req._item.id });
+      await Sessions.update(
+        { total: req._session.total - req._item.price * req._item.quantity },
+        { id: req.params.id }
+      );
+
+      const sessions = await Sessions.customQuery(
+        "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+        []
+      );
+      const session = await Sessions.find({ id: req.params.id });
+      const items = await SessionItems.customQuery(
+        "SELECT * FROM sessionItems WHERE sessionId = ?",
+        [req.params.id]
+      );
+
+      req.app
+        .get("socketService")
+        .broadcastEmiter(JSON.stringify(sessions), "new-session");
+      req.app.get("socketService").broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Article retiré",
+        sessions,
+        session: session[0],
+        items,
+      });
+    }
     const toInsertTransactions = {
       sessionId: req.params.id,
       categoryId: defaultCategory[0].id,
@@ -219,22 +463,146 @@ exports.removeItem = async (req, res) => {
 
 exports.increaseQuantity = async (req, res) => {
   try {
-    console.log("hey");
     const now = moment();
     const productData = await Products.find({ id: req._item.productId });
     const quantityToSet = req._item.quantity + 1;
-    console.log(quantityToSet);
-    console.log(req._item);
+    
+    req._product = productData[0]
+
+    const defaultCategoryForOutlet = await PTCategory.customQuery(
+      "SELECT * FROM ptCategory WHERE id = 3"
+    );
+
+    if (req._product.hasLink) {
+      const links = await Products.customQuery(
+        "SELECT * FROM linkedProduct WHERE productLinkId = ?",
+        [req._product.id]
+      );
+      let linkedProducts = [];
+      for (let index2 in links) {
+        const product = await Products.find({ id: links[index2].productId });
+        if (product[0].inStock - links[index2].quantity < 0) {
+          return res.status(400).json({
+            error: true,
+            message: `Stock insuffisant pour ${product[0].name}`,
+          });
+        }
+        linkedProducts.push({
+          ...product[0],
+          quantity: links[index2].quantity,
+        });
+      }
+
+      for (let index in linkedProducts) {
+        const el = linkedProducts[index];
+        const toInsertTransactions = {
+          sessionId: req.params.id,
+          categoryId: defaultCategoryForOutlet[0].id,
+          productId: el.id,
+          userId: req.user.id,
+          categoryName: defaultCategoryForOutlet[0].name,
+          productName: el.name,
+          userName: req.user.name,
+          enter: 0,
+          outlet: Number(el.quantity),
+          after: el.inStock - Number(el.quantity),
+          description: `Vente de ${req._item.productName}`,
+          timestamp: now.unix(),
+        };
+        await Transactions.insertOne(toInsertTransactions);
+        await Products.update(
+          { inStock: el.inStock - Number(el.quantity) },
+          { id: el.id }
+        );
+      }
+
+      let falseTotal =
+        req._session.total - req._item.price * req._item.quantity;
+      let newTotal = falseTotal + req._item.price * quantityToSet;
+
+      await SessionItems.update(
+        { quantity: quantityToSet },
+        { id: req.params.idItem }
+      );
+      await Sessions.update({ total: newTotal }, { id: req.params.id });
+      
+      const sessions = await Sessions.customQuery(
+        "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+        []
+      );
+      const session = await Sessions.find({ id: req.params.id });
+      const items = await SessionItems.customQuery(
+        "SELECT * FROM sessionItems WHERE sessionId = ?",
+        [req.params.id]
+      );
+
+      req.app
+        .get("socketService")
+        .broadcastEmiter(JSON.stringify(sessions), "new-session");
+      req.app.get("socketService").broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Quantité augmentée",
+        sessions,
+        session: session[0],
+        items,
+      });
+    }
+    if (req._product.isVersatile) {
+      let falseTotal =
+        req._session.total - req._item.price * req._item.quantity;
+      let newTotal = falseTotal + req._item.price * quantityToSet;
+
+      await SessionItems.update(
+        { quantity: quantityToSet },
+        { id: req.params.idItem }
+      );
+      await Sessions.update({ total: newTotal }, { id: req.params.id });
+
+      const sessions = await Sessions.customQuery(
+        "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+        []
+      );
+      const session = await Sessions.find({ id: req.params.id });
+      const items = await SessionItems.customQuery(
+        "SELECT * FROM sessionItems WHERE sessionId = ?",
+        [req.params.id]
+      );
+
+      req.app
+        .get("socketService")
+        .broadcastEmiter(JSON.stringify(sessions), "new-session");
+      req.app.get("socketService").broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Quantité augmentée",
+        sessions,
+        session: session[0],
+        items,
+      });
+    }
 
     if (productData[0].inStock - 1 < 0) {
       return res
         .status(400)
         .json({ error: true, message: "Stock insuffisant" });
     }
-
-    const defaultCategoryForOutlet = await PTCategory.customQuery(
-      "SELECT * FROM ptCategory WHERE id = 3"
-    );
 
     const toInsertTransactions = {
       sessionId: req.params.id,
@@ -306,6 +674,10 @@ exports.decreaseQuantity = async (req, res) => {
     const now = moment();
     const productData = await Products.find({ id: req._item.productId });
     const quantityToSet = req._item.quantity - 1;
+    const defaultCategoryForEnter = await PTCategory.customQuery(
+      "SELECT * FROM ptCategory WHERE id = 2"
+    );
+    req._product = productData[0]
 
     if (quantityToSet < 1) {
       return res
@@ -313,15 +685,130 @@ exports.decreaseQuantity = async (req, res) => {
         .json({ error: true, message: "Quantité minimale atteinte" });
     }
 
+
+    if (req._product.hasLink) {
+      const links = await Products.customQuery(
+        "SELECT * FROM linkedProduct WHERE productLinkId = ?",
+        [req._product.id]
+      );
+      let linkedProducts = [];
+      for (let index2 in links) {
+        const product = await Products.find({ id: links[index2].productId });
+        linkedProducts.push({
+          ...product[0],
+          quantity: links[index2].quantity,
+        });
+      }
+
+      for (let index in linkedProducts) {
+        const el = linkedProducts[index];
+        const toInsertTransactions = {
+          sessionId: req.params.id,
+          categoryId: defaultCategoryForEnter[0].id,
+          productId: el.id,
+          userId: req.user.id,
+          categoryName: defaultCategoryForEnter[0].name,
+          productName: el.name,
+          userName: req.user.name,
+          enter: Number(el.quantity),
+          outlet: 0,
+          after: el.inStock + Number(el.quantity),
+          description: `Retrait de 1 ${req._item.productName}`,
+          timestamp: now.unix(),
+        };
+        await Transactions.insertOne(toInsertTransactions);
+        await Products.update(
+          { inStock: el.inStock + Number(el.quantity) },
+          { id: el.id }
+        );
+      }
+
+      let falseTotal =
+        req._session.total - req._item.price * req._item.quantity;
+      let newTotal = falseTotal + req._item.price * quantityToSet;
+
+      await SessionItems.update(
+        { quantity: quantityToSet },
+        { id: req.params.idItem }
+      );
+      await Sessions.update({ total: newTotal }, { id: req.params.id });
+      
+      const sessions = await Sessions.customQuery(
+        "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+        []
+      );
+      const session = await Sessions.find({ id: req.params.id });
+      const items = await SessionItems.customQuery(
+        "SELECT * FROM sessionItems WHERE sessionId = ?",
+        [req.params.id]
+      );
+
+      req.app
+        .get("socketService")
+        .broadcastEmiter(JSON.stringify(sessions), "new-session");
+      req.app.get("socketService").broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Quantité baissée",
+        sessions,
+        session: session[0],
+        items,
+      });
+    }
+    if (req._product.isVersatile) {
+      let falseTotal = req._session.total - req._item.price * req._item.quantity;
+      let newTotal = falseTotal + req._item.price * quantityToSet;
+
+      await SessionItems.update(
+        { quantity: quantityToSet },
+        { id: req.params.idItem }
+      );
+      await Sessions.update({ total: newTotal }, { id: req.params.id });
+
+      const sessions = await Sessions.customQuery(
+        "SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)",
+        []
+      );
+      const session = await Sessions.find({ id: req.params.id });
+      const items = await SessionItems.customQuery(
+        "SELECT * FROM sessionItems WHERE sessionId = ?",
+        [req.params.id]
+      );
+
+      req.app
+        .get("socketService")
+        .broadcastEmiter(JSON.stringify(sessions), "new-session");
+      req.app.get("socketService").broadcastEmiter(
+        JSON.stringify({
+          id: req.params.id,
+          session: session[0],
+          items: items,
+        }),
+        "edit-session"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Quantité baissée",
+        sessions,
+        session: session[0],
+        items,
+      });
+    }
+
     if (quantityToSet > productData[0].inStock) {
       return res
         .status(400)
         .json({ error: true, message: "Stock insuffisant" });
     }
-
-    const defaultCategoryForEnter = await PTCategory.customQuery(
-      "SELECT * FROM ptCategory WHERE id = 2"
-    );
 
     const toInsertTransactions = {
       sessionId: req.params.id,
@@ -387,57 +874,6 @@ exports.decreaseQuantity = async (req, res) => {
       .json({ error: true, message: "Une erreur inconnue a eu lieu" });
   }
 };
-
-// exports.changeQuantity = async (req, res) => {
-//   try {
-//     const now = moment();
-//     const productData = await Products.find({ id: req._item.productId });
-//     const quantityToSet = Number(req.body.quantity);
-//     const quantityDifference = quantityToSet - req._item.quantity;
-
-//     if (quantityDifference === 0) {
-//       return res.status(400).json({ error: true, message: "Quantité identique" });
-//     }
-//     if (quantityToSet > productData[0].inStock) {
-//       return res.status(400).json({ error: true, message: "Stock insuffisant" });
-//     }
-
-//     const defaultCategoryForEnter = await PTCategory.customQuery("SELECT * FROM ptCategory WHERE id = 2");
-//     const defaultCategoryForOutlet = await PTCategory.customQuery("SELECT * FROM ptCategory WHERE id = 3");
-
-//     const toInsertTransactions = {
-//       sessionId: req.params.id,
-//       categoryId: quantityDifference < 0 ? defaultCategoryForEnter[0].id : defaultCategoryForOutlet[0].id,
-//       productId: req._item.productId,
-//       userId: req.user.id,
-//       categoryName: quantityDifference < 0 ? defaultCategoryForEnter[0].name : defaultCategoryForOutlet[0].name,
-//       productName: req._item.productName,
-//       userName: req.user.name,
-//       enter: quantityDifference < 0 ? Math.abs(quantityDifference) : 0,
-//       outlet: quantityDifference > 0 ? quantityDifference : 0,
-//       after: productData[0].inStock - quantityDifference,
-//       description: quantityDifference < 0 ? `Ajout de ${quantityDifference} ${req._item.productName}` : `Retrait de ${Math.abs(quantityDifference)} ${req._item.productName}`,
-//       timestamp: now.unix(),
-//     };
-
-//     let falseTotal = req._session.total - (req._item.price * req._item.quantity);
-//     let newTotal = falseTotal + (req._item.price * quantityToSet);
-
-//     await Transactions.insertOne(toInsertTransactions);
-//     await SessionItems.update({ quantity: quantityToSet }, { id: req.params.itemId });
-//     await Products.update({ inStock: productData[0].inStock - quantityDifference }, { id: req._item.productId });
-//     await Sessions.update({ total: newTotal }, { id: req.params.id });
-
-//
-//    const sessions = await Sessions.customQuery("SELECT * FROM sessions WHERE isDone = 0 OR (isPaid = 0 AND isDebt = 0)", []);
-//     const session = await Sessions.find({ id: req.params.id });
-//     const items = await SessionItems.customQuery("SELECT * FROM sessionItems WHERE sessionId = ?", [req.params.id]);
-
-//     return res.status(200).json({ success: true, message: "Quantité modifiée", sessions, session: session[0], items });
-//   } catch (error) {
-//     return res.status(500).json({ error: true, message: "Une erreur inconnue a eu lieu" });
-//   }
-// }
 
 exports.addReduction = async (req, res) => {
   try {
@@ -875,9 +1311,9 @@ exports.getOneSession = async (req, res) => {
 
 exports.getReportOfADay = async (req, res) => {
   try {
-    const begin = Number(req.params.timestamp);
+    const begin = Number(req.params.timestamp) + 18000;
     console.log(begin);
-    const end = Number(req.params.timestamp) + 86400; // marge de 4 heures en plus
+    const end = Number(req.params.timestamp) + 86400 + 18000; // marge de 5 heures en plus
     console.log(end);
 
     const revenue = await Sessions.customQuery(
@@ -888,24 +1324,6 @@ exports.getReportOfADay = async (req, res) => {
       "SELECT accountId, accountName, SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ? GROUP BY accountId",
       [begin, end]
     );
-    const revenueForEachCategorie = await Sessions.customQuery(`
-      SELECT 
-    pc.name AS category_name,
-    SUM(si.price * si.quantity) AS category_revenue
-FROM 
-    sessions s
-JOIN 
-    sessionItems si ON s.id = si.sessionId
-JOIN 
-    products p ON si.productId = p.id
-JOIN 
-    productsCategory pc ON p.categoryId = pc.id
-WHERE 
-    s.isPaid = 1
-    AND s.timestamp BETWEEN ? AND ?
-GROUP BY 
-    pc.name;
-`, [begin, end]);
 
     const debtTaken = await Sessions.customQuery(
       "SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isDebt = 1 AND timestamp > ? AND timestamp < ?",
@@ -930,19 +1348,16 @@ GROUP BY
       [begin, end]
     );
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        revenue: revenue[0].total,
-        debtTaken: debtTaken[0].total,
-        paidSessions,
-        debtSessions,
-        notPaidSessions,
-        revenueForEachAccount,
-        selledItems,
-        revenueForEachCategorie,
-      });
+    return res.status(200).json({
+      success: true,
+      revenue: revenue[0].total,
+      debtTaken: debtTaken[0].total,
+      paidSessions,
+      debtSessions,
+      notPaidSessions,
+      revenueForEachAccount,
+      selledItems,
+    });
   } catch (error) {
     console.log(error);
     return res
@@ -953,9 +1368,9 @@ GROUP BY
 
 exports.getReportOfAPeriod = async (req, res) => {
   try {
-    const begin = Number(req.params.begin);
+    const begin = Number(req.params.begin) + 18000;
     console.log(begin);
-    const end = Number(req.params.end);
+    const end = Number(req.params.end) + 86400 + 18000;
     console.log(end);
 
     const revenue = await Sessions.customQuery(
@@ -966,24 +1381,6 @@ exports.getReportOfAPeriod = async (req, res) => {
       "SELECT accountId, accountName, SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ? GROUP BY accountId",
       [begin, end]
     );
-    const revenueForEachCategorie = await Sessions.customQuery(`
-      SELECT 
-    pc.name AS category_name,
-    SUM(si.price * si.quantity) AS category_revenue
-FROM 
-    sessions s
-JOIN 
-    sessionItems si ON s.id = si.sessionId
-JOIN 
-    products p ON si.productId = p.id
-JOIN 
-    productsCategory pc ON p.categoryId = pc.id
-WHERE 
-    s.isPaid = 1
-    AND s.timestamp BETWEEN ? AND ?
-GROUP BY 
-    pc.name;
-`, [begin, end]);
 
     const debtTaken = await Sessions.customQuery(
       "SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isDebt = 1 AND timestamp > ? AND timestamp < ?",
@@ -1008,19 +1405,16 @@ GROUP BY
       [begin, end]
     );
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        revenue: revenue[0].total,
-        debtTaken: debtTaken[0].total,
-        paidSessions,
-        debtSessions,
-        notPaidSessions,
-        revenueForEachAccount,
-        selledItems,
-        revenueForEachCategorie,
-      });
+    return res.status(200).json({
+      success: true,
+      revenue: revenue[0].total,
+      debtTaken: debtTaken[0].total,
+      paidSessions,
+      debtSessions,
+      notPaidSessions,
+      revenueForEachAccount,
+      selledItems,
+    });
   } catch (error) {
     console.log(error);
     return res
@@ -1086,7 +1480,8 @@ exports.generateVoucherForDrinks = async (req, res) => {
                 console.log(err);
               } else {
                 Sessions.customQuery("INSERT INTO vouchers SET ?", {
-                  voucherUrl: `${process.env.URL}/Vouchers/${nameOfFile}`,
+                  sessionId: req.params.id,
+                  voucherUrl: `http://143.198.59.223/Vouchers/${nameOfFile}`,
                   serverName: req._session.serverName,
                   clientName: req._session.clientName,
                   timestamp: now.unix(),
@@ -1100,7 +1495,7 @@ exports.generateVoucherForDrinks = async (req, res) => {
                         req.app
                           .get("socketService")
                           .broadcastEmiter(
-                            `${process.env.URL}/Vouchers/${nameOfFile}`,
+                            `http://143.198.59.223/Vouchers/${nameOfFile}`,
                             "print-session"
                           );
                         res.status(200).json({ success: true });
@@ -1179,7 +1574,8 @@ exports.generateVoucherForFoods = async (req, res) => {
                 console.log(err);
               } else {
                 Sessions.customQuery("INSERT INTO vouchers SET ?", {
-                  voucherUrl: `${process.env.URL}/Vouchers/${nameOfFile}`,
+                  sessionId: req.params.id,
+                  voucherUrl: `http://143.198.59.223/Vouchers/${nameOfFile}`,
                   serverName: req._session.serverName,
                   clientName: req._session.clientName,
                   timestamp: now.unix(),
@@ -1193,7 +1589,7 @@ exports.generateVoucherForFoods = async (req, res) => {
                         req.app
                           .get("socketService")
                           .broadcastEmiter(
-                            `${process.env.URL}/Vouchers/${nameOfFile}`,
+                            `http://143.198.59.223/Vouchers/${nameOfFile}`,
                             "print-session"
                           );
                         res.status(200).json({ success: true });

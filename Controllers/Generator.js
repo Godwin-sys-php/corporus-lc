@@ -6,6 +6,8 @@ const moment = require("moment");
 const Sessions = require("../Models/Sessions");
 const SessionItems = require("../Models/SessionItems");
 
+require("dotenv").config();
+
 module.exports = async (req, res) => {
   try {
     console.log("hey");
