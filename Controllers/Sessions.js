@@ -930,6 +930,10 @@ GROUP BY
       [begin, end]
     );
 
+    const sessions = await Sessions.customQuery("SELECT * FROM sessions WHERE timestamp > ? AND timestamp < ?", [begin, end]);
+    
+    const cumulClients = await Sessions.customQuery("SELECT clientName, SUM(total - reduction) AS total FROM sessions WHERE timestamp > ? AND timestamp < ? GROUP BY clientName", [begin, end]);
+
     return res
       .status(200)
       .json({
@@ -942,6 +946,8 @@ GROUP BY
         revenueForEachAccount,
         selledItems,
         revenueForEachCategorie,
+        sessions,
+        cumulClients,
       });
   } catch (error) {
     console.log(error);
