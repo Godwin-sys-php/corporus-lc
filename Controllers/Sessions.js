@@ -333,7 +333,7 @@ exports.decreaseQuantity = async (req, res) => {
       userName: req.user.name,
       enter: 1,
       outlet: 0,
-      after: productData[0].inStock - 1,
+      after: productData[0].inStock + 1,
       description: `Ajout de 1 ${req._item.productName}`,
       timestamp: now.unix(),
     };
