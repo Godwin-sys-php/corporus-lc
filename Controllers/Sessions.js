@@ -932,7 +932,7 @@ GROUP BY
 
     const sessions = await Sessions.customQuery("SELECT * FROM sessions WHERE timestamp > ? AND timestamp < ?", [begin, end]);
     
-    const cumulClients = await Sessions.customQuery("SELECT clientName, SUM(total - reduction) AS total FROM sessions WHERE timestamp > ? AND timestamp < ? GROUP BY clientName", [begin, end]);
+    const cumulClients = await Sessions.customQuery("SELECT clientName, SUM(total - reduction) AS total FROM sessions WHERE timestamp > ? AND timestamp < ? AND isDone = 1 AND isPaid = 1 GROUP BY clientName", [begin, end]);
 
     return res
       .status(200)
@@ -1013,6 +1013,8 @@ GROUP BY
       "SELECT sum(quantity) as quantity, productName, id FROM sessionItems WHERE timestamp > ? AND timestamp < ? GROUP by productId",
       [begin, end]
     );
+    
+    const cumulClients = await Sessions.customQuery("SELECT clientName, SUM(total - reduction) AS total FROM sessions WHERE timestamp > ? AND timestamp < ? AND isDone = 1 AND isPaid = 1 GROUP BY clientName", [begin, end]);
 
     return res
       .status(200)
@@ -1026,6 +1028,7 @@ GROUP BY
         revenueForEachAccount,
         selledItems,
         revenueForEachCategorie,
+        cumulClients,
       });
   } catch (error) {
     console.log(error);

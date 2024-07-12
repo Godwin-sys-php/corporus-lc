@@ -179,7 +179,7 @@ exports.transferToBar = async (req, res) => {
       userName: req.user.name,
       enter: Number(req.body.quantity),
       outlet: 0,
-      after: req._product.inStock - Number(req.body.quantity),
+      after: req._product.inStock + Number(req.body.quantity),
       description: "Reception depuis dépot",
       timestamp: now.unix(),
     }
