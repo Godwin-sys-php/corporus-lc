@@ -101,16 +101,12 @@ margin-top: -8px;
       <br /><br /><br />
       <table class="total">
         <tr>
-          <td>TOTAL GÉNÉRAL</td>
-          <td class="align-right"><%= data.totalGeneral %>$</td>
+          <td>TOTAL GÉNÉRAL ($)</td>
+          <td class="align-right"><%= data.totalGeneral %> $</td>
         </tr>
         <tr>
-          <td>PAYÉ</td>
-          <td class="align-right"><%= data.payed %>$</td>
-        </tr>
-        <tr>
-          <td>RESTE À PAYER</td>
-          <td class="align-right"><%= data.totalGeneral - data.payed %>$</td>
+          <td>TOTAL GÉNÉRAL (FC)</td>
+          <td class="align-right"><%= data.totalInFranc %> FC</td>
         </tr>
       </table>
       <br />

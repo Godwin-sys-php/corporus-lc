@@ -29,6 +29,7 @@ module.exports = async (req, res) => {
         reduction: req._session.reduction,
         totalGeneral:
           Number(req._session.total) - Number(req._session.reduction),
+        totalInFranc: (Number(req._session.total) - Number(req._session.reduction)) * 2850,
         payed: Number(req._session.total) - Number(req._session.reduction),
         imgPath: path.join(__dirname, "../Assets/", "logo.png"),
       },
