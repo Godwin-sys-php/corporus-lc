@@ -926,7 +926,7 @@ GROUP BY
     );
 
     const selledItems = await SessionItems.customQuery(
-      "SELECT sum(quantity) as quantity, productName, id FROM sessionItems WHERE timestamp > ? AND timestamp < ? GROUP by productId",
+      "SELECT SUM(si.quantity) AS quantity, si.productName, si.id, p.categoryName FROM sessionItems si JOIN products p ON si.productId = p.id WHERE si.timestamp > ? AND si.timestamp < ? GROUP BY si.productId, si.productName, si.id, p.categoryName",
       [begin, end]
     );
 
@@ -1010,7 +1010,7 @@ GROUP BY
     );
 
     const selledItems = await SessionItems.customQuery(
-      "SELECT sum(quantity) as quantity, productName, id FROM sessionItems WHERE timestamp > ? AND timestamp < ? GROUP by productId",
+      "SELECT SUM(si.quantity) AS quantity, si.productName, si.id, p.categoryName FROM sessionItems si JOIN products p ON si.productId = p.id WHERE si.timestamp > ? AND si.timestamp < ? GROUP BY si.productId, si.productName, si.id, p.categoryName",
       [begin, end]
     );
     
