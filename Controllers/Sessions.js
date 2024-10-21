@@ -877,7 +877,7 @@ exports.getReportOfADay = async (req, res) => {
   try {
     const begin = Number(req.params.timestamp);
     console.log(begin);
-    const end = Number(req.params.timestamp) + 86400; // marge de 4 heures en plus
+    const end = Number(req.params.timestamp) + 86400 + 21600; // marge de 4 heures en plus
     console.log(end);
 
     const revenue = await Sessions.customQuery(
@@ -961,7 +961,7 @@ exports.getReportOfAPeriod = async (req, res) => {
   try {
     const begin = Number(req.params.begin);
     console.log(begin);
-    const end = Number(req.params.end);
+    const end = Number(req.params.end) + 86400 + 21600;
     console.log(end);
 
     const revenue = await Sessions.customQuery(
