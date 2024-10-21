@@ -15,6 +15,17 @@ const path = require("path");
 const ejs = require("ejs");
 const pdf = require("html-pdf");
 
+function setAt6AM(timestamp) {
+  // Crée un objet moment à partir du timestamp en secondes
+  let momentObject = moment.unix(timestamp).utcOffset('+01:00');
+  
+  // Remet l'heure à 6h du matin du même jour en GMT+1
+  momentObject.set({ hour: 6, minute: 0, second: 0, millisecond: 0 });
+  
+  // Retourner le nouveau timestamp en secondes
+  return momentObject.unix();
+}
+
 require("dotenv").config();
 
 exports.startNewSession = async (req, res) => {
@@ -877,7 +888,7 @@ exports.getReportOfADay = async (req, res) => {
   try {
     const begin = Number(req.params.timestamp);
     console.log(begin);
-    const end = Number(req.params.timestamp) + 86400 + 21600; // marge de 4 heures en plus
+    const end = setAt6AM(Number(req.params.timestamp) + 86400); // marge de 4 heures en plus
     console.log(end);
 
     const revenue = await Sessions.customQuery(
@@ -961,7 +972,7 @@ exports.getReportOfAPeriod = async (req, res) => {
   try {
     const begin = Number(req.params.begin);
     console.log(begin);
-    const end = Number(req.params.end) + 86400 + 21600;
+    const end = setAt6AM(Number(req.params.end));
     console.log(end);
 
     const revenue = await Sessions.customQuery(
