@@ -26,6 +26,17 @@ function setAt6AM(timestamp) {
   return momentObject.unix();
 }
 
+function setAt00AM(timestamp) {
+  // Crée un objet moment à partir du timestamp en secondes
+  let momentObject = moment.unix(timestamp).utcOffset('+01:00');
+  
+  // Remet l'heure à 00h00 du même jour en GMT+1
+  momentObject.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+  
+  // Retourner le nouveau timestamp en secondes
+  return momentObject.unix();
+}
+
 require("dotenv").config();
 
 exports.startNewSession = async (req, res) => {
@@ -886,7 +897,7 @@ exports.getOneSession = async (req, res) => {
 
 exports.getReportOfADay = async (req, res) => {
   try {
-    const begin = Number(req.params.timestamp);
+    const begin = setAt00AM(Number(req.params.timestamp));
     console.log(begin);
     const end = setAt6AM(Number(req.params.timestamp) + 86400); // marge de 4 heures en plus
     console.log(end);
@@ -970,7 +981,7 @@ GROUP BY
 
 exports.getReportOfAPeriod = async (req, res) => {
   try {
-    const begin = Number(req.params.begin);
+    const begin = setAt00AM(Number(req.params.begin));
     console.log(begin);
     const end = setAt6AM(Number(req.params.end));
     console.log(end);
