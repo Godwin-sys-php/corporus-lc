@@ -983,7 +983,7 @@ exports.getReportOfAPeriod = async (req, res) => {
   try {
     const begin = setAt00AM(Number(req.params.begin));
     console.log(begin);
-    const end = setAt6AM(Number(req.params.end));
+    const end = setAt6AM(Number(req.params.end) + 86400);
     console.log(end);
 
     const revenue = await Sessions.customQuery(
