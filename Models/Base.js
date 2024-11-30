@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 require('dotenv').config();
 
 class Base {
-  constructor(){ 
+  constructor(){
     this.bdd = mysql.createPool({
       host: process.env.DATABASE_HOST,
       port: process.env.DATABASE_PORT,
