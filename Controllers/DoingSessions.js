@@ -14,25 +14,58 @@ const fs = require("fs");
 const path = require("path");
 const ejs = require("ejs");
 const pdf = require("html-pdf");
+const SessionActions = require("../Models/SessionActions");
+const {
+  SESSION_CREATION,
+  ADD_ITEM,
+  REMOVE_ITEM,
+  INCREASE_QUANTITY,
+  DECREASE_QUANTITY,
+  ADD_REDUCTION,
+  REMOVE_REDUCTION,
+  DEBT_SESSION,
+  END_SESSION,
+  PAY_SESSION,
+  REMOVE_IS_DONE,
+  REMOVE_PAYMENT,
+  PRINT_DRINKS_VOUCHER,
+  PRINT_FOODS_VOUCHER,
+} = require("../Utils/actions");
+const {
+  sessionCreation,
+  addItem,
+  removeItem,
+  increaseQuantity,
+  decreaseQuantity,
+  addReduction,
+  removeReduction,
+  debtSession,
+  endSession,
+  paySession,
+  removeIsDone,
+  removePayment,
+  printDrinksVoucher,
+  printFoodsVoucher,
+} = require("../Utils/comments");
 
 function setAt6AM(timestamp) {
   // Crée un objet moment à partir du timestamp en secondes
-  let momentObject = moment.unix(timestamp).utcOffset('+01:00');
-  
+  let momentObject = moment.unix(timestamp).utcOffset("+01:00");
+
   // Remet l'heure à 6h du matin du même jour en GMT+1
   momentObject.set({ hour: 6, minute: 0, second: 0, millisecond: 0 });
-  
+
   // Retourner le nouveau timestamp en secondes
   return momentObject.unix();
 }
 
 function setAt00AM(timestamp) {
   // Crée un objet moment à partir du timestamp en secondes
-  let momentObject = moment.unix(timestamp).utcOffset('+01:00');
-  
+  let momentObject = moment.unix(timestamp).utcOffset("+01:00");
+
   // Remet l'heure à 00h00 du même jour en GMT+1
   momentObject.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-  
+
   // Retourner le nouveau timestamp en secondes
   return momentObject.unix();
 }
@@ -67,6 +100,19 @@ exports.startNewSession = async (req, res) => {
       "SELECT * FROM users WHERE type = ?",
       ["serveur"]
     );
+
+    await SessionActions.insertOne({
+      sessionId: inserted.insertId,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: SESSION_CREATION,
+      comment: sessionCreation(
+        inserted.insertId,
+        req._client.name,
+        req.user.name
+      ),
+      timestamp: now.unix(),
+    });
 
     req.app
       .get("socketService")
@@ -129,7 +175,9 @@ exports.addItem = async (req, res) => {
       { inStock: Number(req._product.inStock) - Number(req.body.quantity) },
       { id: req._product.id }
     );
-    await Transactions.insertOne(toInsertTransactions);
+    const insertedTransaction = await Transactions.insertOne(
+      toInsertTransactions
+    );
     await Sessions.update(
       { total: req._session.total + req._product.price * req.body.quantity },
       { id: req.params.id }
@@ -144,6 +192,21 @@ exports.addItem = async (req, res) => {
       "SELECT * FROM sessionItems WHERE sessionId = ?",
       [req.params.id]
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: ADD_ITEM,
+      comment: addItem(
+        req.params.id,
+        req._product.name,
+        req.body.quantity,
+        req.user.name,
+        insertedTransaction.insertId
+      ),
+      timestamp: now.unix(),
+    });
 
     req.app
       .get("socketService")
@@ -197,7 +260,9 @@ exports.removeItem = async (req, res) => {
       { inStock: req._product.inStock + req._item.quantity },
       { id: req._item.productId }
     );
-    await Transactions.insertOne(toInsertTransactions);
+    const insertedTransaction = await Transactions.insertOne(
+      toInsertTransactions
+    );
     await Sessions.update(
       { total: req._session.total - req._item.price * req._item.quantity },
       { id: req.params.id }
@@ -212,6 +277,21 @@ exports.removeItem = async (req, res) => {
       "SELECT * FROM sessionItems WHERE sessionId = ?",
       [req.params.id]
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: REMOVE_ITEM,
+      comment: removeItem(
+        req.params.id,
+        req._product.name,
+        req.body.quantity,
+        req.user.name,
+        insertedTransaction.insertId
+      ),
+      timestamp: now.unix(),
+    });
 
     req.app
       .get("socketService")
@@ -276,7 +356,9 @@ exports.increaseQuantity = async (req, res) => {
     let falseTotal = req._session.total - req._item.price * req._item.quantity;
     let newTotal = falseTotal + req._item.price * quantityToSet;
 
-    await Transactions.insertOne(toInsertTransactions);
+    const insertedTransaction = await Transactions.insertOne(
+      toInsertTransactions
+    );
     await SessionItems.update(
       { quantity: quantityToSet },
       { id: req.params.idItem }
@@ -296,6 +378,21 @@ exports.increaseQuantity = async (req, res) => {
       "SELECT * FROM sessionItems WHERE sessionId = ?",
       [req.params.id]
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: INCREASE_QUANTITY,
+      comment: increaseQuantity(
+        req.params.id,
+        req._item.productName,
+        1,
+        req.user.name,
+        insertedTransaction.insertId
+      ),
+      timestamp: now.unix(),
+    });
 
     req.app
       .get("socketService")
@@ -363,7 +460,9 @@ exports.decreaseQuantity = async (req, res) => {
     let falseTotal = req._session.total - req._item.price * req._item.quantity;
     let newTotal = falseTotal + req._item.price * quantityToSet;
 
-    await Transactions.insertOne(toInsertTransactions);
+    const insertedTransaction = await Transactions.insertOne(
+      toInsertTransactions
+    );
     await SessionItems.update(
       { quantity: quantityToSet },
       { id: req.params.idItem }
@@ -383,6 +482,21 @@ exports.decreaseQuantity = async (req, res) => {
       "SELECT * FROM sessionItems WHERE sessionId = ?",
       [req.params.id]
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: DECREASE_QUANTITY,
+      comment: decreaseQuantity(
+        req.params.id,
+        req._item.productName,
+        1,
+        req.user.name,
+        insertedTransaction.insertId
+      ),
+      timestamp: now.unix(),
+    });
 
     req.app
       .get("socketService")
@@ -496,6 +610,15 @@ exports.addReduction = async (req, res) => {
       "edit-session"
     );
 
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: ADD_REDUCTION,
+      comment: addReduction(req.params.id, req.body.amount, req.user.name),
+      timestamp: moment().unix(),
+    });
+
     return res.status(200).json({
       success: true,
       message: "Réduction ajoutée",
@@ -524,6 +647,19 @@ exports.removeReduction = async (req, res) => {
       "SELECT * FROM sessionItems WHERE sessionId = ?",
       [req.params.id]
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: REMOVE_REDUCTION,
+      comment: removeReduction(
+        req.params.id,
+        req._session.reduction,
+        req.user.name
+      ),
+      timestamp: moment().unix(),
+    });
 
     req.app
       .get("socketService")
@@ -586,6 +722,19 @@ exports.debtSession = async (req, res) => {
       [req.params.id]
     );
 
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: DEBT_SESSION,
+      comment: debtSession(
+        req.params.id,
+        req.user.name,
+        req._session.total - req._session.reduction
+      ),
+      timestamp: now.unix(),
+    });
+
     req.app
       .get("socketService")
       .broadcastEmiter(JSON.stringify(sessions), "new-session");
@@ -616,6 +765,15 @@ exports.debtSession = async (req, res) => {
 exports.endSession = async (req, res, next) => {
   try {
     await Sessions.update({ isDone: 1 }, { id: req.params.id });
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: END_SESSION,
+      comment: endSession(req.params.id, req.user.name),
+      timestamp: moment().unix(),
+    });
 
     return next();
   } catch (error) {
@@ -652,7 +810,7 @@ exports.paySession = async (req, res) => {
       description: `Paiement facture ; ID: ${req.params.id}`,
       timestamp: now.unix(),
     };
-    await MTransactions.insertOne(toInsert);
+    const insertedTransaction = await MTransactions.insertOne(toInsert);
     await MAccount.update(
       { amount: toInsert.after },
       { id: accountData[0].id }
@@ -676,6 +834,20 @@ exports.paySession = async (req, res) => {
       "SELECT * FROM sessionItems WHERE sessionId = ?",
       [req.params.id]
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: PAY_SESSION,
+      comment: paySession(
+        req.params.id,
+        req.user.name,
+        req._session.total - req._session.reduction,
+        insertedTransaction.insertId
+      ),
+      timestamp: now.unix(),
+    });
 
     req.app
       .get("socketService")
@@ -716,6 +888,15 @@ exports.removeIsDone = async (req, res) => {
       "SELECT * FROM sessionItems WHERE sessionId = ?",
       [req.params.id]
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: REMOVE_IS_DONE,
+      comment: removeIsDone(req.params.id, req.user.name),
+      timestamp: moment().unix(),
+    });
 
     req.app
       .get("socketService")
@@ -771,7 +952,7 @@ exports.removePayment = async (req, res) => {
       description: `Annulation paiement facture ; ID: ${req.params.id}`,
       timestamp: now.unix(),
     };
-    await MTransactions.insertOne(toInsert);
+    const insertedTransaction = await MTransactions.insertOne(toInsert);
     await MAccount.update(
       { amount: toInsert.after },
       { id: accountData[0].id }
@@ -791,6 +972,20 @@ exports.removePayment = async (req, res) => {
       "SELECT * FROM sessionItems WHERE sessionId = ?",
       [req.params.id]
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: REMOVE_PAYMENT,
+      comment: removePayment(
+        req.params.id,
+        req.user.name,
+        req._session.total - req._session.reduction,
+        insertedTransaction.insertId
+      ),
+      timestamp: moment().unix(),
+    });
 
     req.app
       .get("socketService")
@@ -910,7 +1105,8 @@ exports.getReportOfADay = async (req, res) => {
       "SELECT accountId, accountName, SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ? GROUP BY accountId",
       [begin, end]
     );
-    const revenueForEachCategorie = await Sessions.customQuery(`
+    const revenueForEachCategorie = await Sessions.customQuery(
+      `
       SELECT 
     pc.name AS category_name,
     SUM(si.price * si.quantity) AS category_revenue
@@ -927,7 +1123,9 @@ WHERE
     AND s.timestamp BETWEEN ? AND ?
 GROUP BY 
     pc.name;
-`, [begin, end]);
+`,
+      [begin, end]
+    );
 
     const debtTaken = await Sessions.customQuery(
       "SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isDebt = 1 AND timestamp > ? AND timestamp < ?",
@@ -952,25 +1150,29 @@ GROUP BY
       [begin, end]
     );
 
-    const sessions = await Sessions.customQuery("SELECT * FROM sessions WHERE timestamp > ? AND timestamp < ?", [begin, end]);
-    
-    const cumulClients = await Sessions.customQuery("SELECT clientName, SUM(total - reduction) AS total FROM sessions WHERE timestamp > ? AND timestamp < ? AND isDone = 1 AND isPaid = 1 GROUP BY clientName", [begin, end]);
+    const sessions = await Sessions.customQuery(
+      "SELECT * FROM sessions WHERE timestamp > ? AND timestamp < ?",
+      [begin, end]
+    );
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        revenue: revenue[0].total,
-        debtTaken: debtTaken[0].total,
-        paidSessions,
-        debtSessions,
-        notPaidSessions,
-        revenueForEachAccount,
-        selledItems,
-        revenueForEachCategorie,
-        sessions,
-        cumulClients,
-      });
+    const cumulClients = await Sessions.customQuery(
+      "SELECT clientName, SUM(total - reduction) AS total FROM sessions WHERE timestamp > ? AND timestamp < ? AND isDone = 1 AND isPaid = 1 GROUP BY clientName",
+      [begin, end]
+    );
+
+    return res.status(200).json({
+      success: true,
+      revenue: revenue[0].total,
+      debtTaken: debtTaken[0].total,
+      paidSessions,
+      debtSessions,
+      notPaidSessions,
+      revenueForEachAccount,
+      selledItems,
+      revenueForEachCategorie,
+      sessions,
+      cumulClients,
+    });
   } catch (error) {
     console.log(error);
     return res
@@ -994,7 +1196,8 @@ exports.getReportOfAPeriod = async (req, res) => {
       "SELECT accountId, accountName, SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isPaid = 1 AND timestamp > ? AND timestamp < ? GROUP BY accountId",
       [begin, end]
     );
-    const revenueForEachCategorie = await Sessions.customQuery(`
+    const revenueForEachCategorie = await Sessions.customQuery(
+      `
       SELECT 
     pc.name AS category_name,
     SUM(si.price * si.quantity) AS category_revenue
@@ -1011,7 +1214,9 @@ WHERE
     AND s.timestamp BETWEEN ? AND ?
 GROUP BY 
     pc.name;
-`, [begin, end]);
+`,
+      [begin, end]
+    );
 
     const debtTaken = await Sessions.customQuery(
       "SELECT SUM(total-reduction) as total FROM sessions WHERE isDone = 1 AND isDebt = 1 AND timestamp > ? AND timestamp < ?",
@@ -1035,26 +1240,30 @@ GROUP BY
       "SELECT SUM(si.quantity) AS quantity, si.productName, si.id, p.categoryName FROM sessionItems si JOIN products p ON si.productId = p.id WHERE si.timestamp > ? AND si.timestamp < ? GROUP BY si.productId, si.productName, p.categoryName",
       [begin, end]
     );
-    
-    const cumulClients = await Sessions.customQuery("SELECT clientName, SUM(total - reduction) AS total FROM sessions WHERE timestamp > ? AND timestamp < ? AND isDone = 1 AND isPaid = 1 GROUP BY clientName", [begin, end]);
 
-    const sessions = await Sessions.customQuery("SELECT * FROM sessions WHERE timestamp > ? AND timestamp < ?", [begin, end]);
+    const cumulClients = await Sessions.customQuery(
+      "SELECT clientName, SUM(total - reduction) AS total FROM sessions WHERE timestamp > ? AND timestamp < ? AND isDone = 1 AND isPaid = 1 GROUP BY clientName",
+      [begin, end]
+    );
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        revenue: revenue[0].total,
-        debtTaken: debtTaken[0].total,
-        paidSessions,
-        debtSessions,
-        notPaidSessions,
-        revenueForEachAccount,
-        selledItems,
-        revenueForEachCategorie,
-        cumulClients,
-        sessions,
-      });
+    const sessions = await Sessions.customQuery(
+      "SELECT * FROM sessions WHERE timestamp > ? AND timestamp < ?",
+      [begin, end]
+    );
+
+    return res.status(200).json({
+      success: true,
+      revenue: revenue[0].total,
+      debtTaken: debtTaken[0].total,
+      paidSessions,
+      debtSessions,
+      notPaidSessions,
+      revenueForEachAccount,
+      selledItems,
+      revenueForEachCategorie,
+      cumulClients,
+      sessions,
+    });
   } catch (error) {
     console.log(error);
     return res
@@ -1067,12 +1276,12 @@ exports.generateVoucherForDrinks = async (req, res) => {
   try {
     console.log("SCUMMMMMMM");
     const now = moment().utcOffset(1);
+    const now2 = moment();
     const items = await Sessions.customQuery(
       "SELECT i.productName as productName, i.quantity-taken as quantity2print, i.price as price from sessionItems i left join products p on p.id = i.productId WHERE i.quantity != taken AND i.sessionId = ? AND (p.categoryId = 1 OR p.categoryId=2 OR p.categoryId=4)",
       [req.params.id]
     );
 
-    console.log(items);
     await Sessions.customQuery(
       "UPDATE sessionItems i left join products p on p.id = i.productId SET i.taken = i.quantity WHERE i.sessionId = ? AND (p.categoryId = 1 OR p.categoryId=2 OR p.categoryId=4)",
       [req.params.id]
@@ -1082,6 +1291,15 @@ exports.generateVoucherForDrinks = async (req, res) => {
       path.join(__dirname, "../Assets/", "number-voucher.txt"),
       "utf-8"
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: PRINT_DRINKS_VOUCHER,
+      comment: printDrinksVoucher(req.params.id, number, req.user.name, items),
+      timestamp: now2.unix(),
+    });
 
     const nameOfTemplate = "voucher.ejs";
     const data = {
@@ -1160,6 +1378,7 @@ exports.generateVoucherForFoods = async (req, res) => {
   try {
     console.log("SCUMMMMMMM");
     const now = moment().utcOffset(1);
+    const now2 = moment();
     const items = await Sessions.customQuery(
       "SELECT i.productName as productName, i.quantity-taken as quantity2print, i.price as price from sessionItems i left join products p on p.id = i.productId WHERE i.quantity != taken AND i.sessionId = ? AND p.categoryId = 3",
       [req.params.id]
@@ -1175,6 +1394,15 @@ exports.generateVoucherForFoods = async (req, res) => {
       path.join(__dirname, "../Assets/", "number-voucher.txt"),
       "utf-8"
     );
+
+    await SessionActions.insertOne({
+      sessionId: req.params.id,
+      userId: req.user.id,
+      userName: req.user.name,
+      action: PRINT_FOODS_VOUCHER,
+      comment: printFoodsVoucher(req.params.id, number, req.user.name, items),
+      timestamp: now2.unix(),
+    });
 
     const nameOfTemplate = "voucher.ejs";
     const data = {
@@ -1264,3 +1492,4 @@ exports.getVouchersPrintWork = async (req, res) => {
       .json({ error: true, message: "Une erreur inconnue a eu lieu" });
   }
 };
+
